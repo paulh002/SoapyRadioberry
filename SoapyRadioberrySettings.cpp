@@ -181,7 +181,7 @@ std::vector<std::string> SoapyRadioberry::listGains( const int direction, const 
 	return(options);
 }
 
-SoapySDR::Range SoapyRadioberry::getGainRange( const int direction, const size_t channel, const std::string &name ) const
+SoapySDR::Range SoapyRadioberry::getGainRange( const int direction, const size_t channel) const
 {
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::getGainRange called");
 	
@@ -196,7 +196,7 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::setGain called");
 	
 	uint32_t command = 0;
-	uint32_t command_data = (0x40 | (((uint32_t) (value + 12.0))  & 0x3F));
+	uint32_t command_data = (0x40 | (((uint32_t)value)  & 0x3F));
 	
 	if(direction==SOAPY_SDR_RX)	 command = 0x14; 
 	if(direction==SOAPY_SDR_TX) { command = 2; }
