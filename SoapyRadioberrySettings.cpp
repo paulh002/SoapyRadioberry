@@ -211,7 +211,7 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	if (direction == SOAPY_SDR_RX)	 
 	{
 		command = 0x14; 
-		command_data = (0x40 | (((uint32_t)value)  & 0x3F));
+		command_data = (0x40 | (((uint32_t)value + 12) & 0x3F));
 	}
 	if(direction==SOAPY_SDR_TX) 
 	{ // 0 -7 TX RF gain 
