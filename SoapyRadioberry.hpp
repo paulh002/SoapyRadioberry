@@ -7,9 +7,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-
+#include <memory>
+#include <string.h> 
 #include "radioberry_ioctl.h"
+#include "i2c.h"
 
+#define TX_MAX 4800
+#define TX_MAX_BUFFER (TX_MAX * 8)
 const int npackages = 4;
 
 class SoapyRadioberry : public SoapySDR::Device{
@@ -63,9 +67,6 @@ class SoapyRadioberry : public SoapySDR::Device{
 				long long &timeNs,
 				const long timeoutUs = 100000 );				
 				
-
-
-/*
 		int writeStream(
 				SoapySDR::Stream *stream,
 				const void * const *buffs,
@@ -74,8 +75,6 @@ class SoapyRadioberry : public SoapySDR::Device{
 				const long long timeNs = 0,
 				const long timeoutUs = 100000);
 
-
-*/
 
 		/*******************************************************************
 		 * Sample Rate API
@@ -122,7 +121,14 @@ class SoapyRadioberry : public SoapySDR::Device{
 
 
 		void controlRadioberry(uint32_t command, uint32_t command_data);
-
+		
+	/*******************************************************************
+	 * I2C API
+	 ******************************************************************/
+	
+		std::string readI2C(const int addr, const size_t numBytes);
+		void writeI2C(const int addr, const std::string &data);
+	
 	private:
 	
 	int fd_rb;	
@@ -130,5 +136,6 @@ class SoapyRadioberry : public SoapySDR::Device{
 	int rx_frequency;
 	int no_channels;	
 	struct rb_info_arg_t rb_control;
- 
+	std::unique_ptr<rpihw::driver::i2c> i2c_ptr;
+	bool	i2c_available = false;
 };

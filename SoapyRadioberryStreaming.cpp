@@ -6,14 +6,22 @@
 	int irate = floor(rate);
 	uint32_t	ucom =0x00000004;
 	
-	 if (rate < 48001.0)
-		 ucom = 0x00000004;
-	 if (rate > 48000.0 && rate < 96001.0)
-		 ucom = 0x01000004;
-	 if (rate > 96000.0 && rate < 192001.0)
-		 ucom = 0x02000004;
-	 if (rate > 192000.0)
-		 ucom = 0x03000004;
+	 if (direction == SOAPY_SDR_TX)
+	 {
+		 if (rate < 48001.0)
+			 ucom = 0x00000004; 
+	 }
+	 else
+	 {
+		 if (rate < 48001.0)
+			 ucom = 0x00000004;
+		 if (rate > 48000.0 && rate < 96001.0)
+			 ucom = 0x01000004;
+		 if (rate > 96000.0 && rate < 192001.0)
+			 ucom = 0x02000004;
+		 if (rate > 192000.0)
+			 ucom = 0x03000004;		 
+	 }
 	
 	this->SoapyRadioberry::controlRadioberry(0, ucom);
 }
@@ -122,11 +130,47 @@ int SoapyRadioberry::readStream(
 			right_sample  = (int)((signed char)rx_buffer[i + 3]) << 16;
 			right_sample |= (int)((((unsigned char)rx_buffer[i + 4]) << 8) & 0xFF00);
 			right_sample |= (int)((unsigned char)rx_buffer[i + 5] & 0xFF);
-
+			right_sample =  right_sample * -1;
+			
 			target_buffer[iq++] = (float)left_sample / 2048.0;  // 12 bit sample
 			target_buffer[iq++] = (float)right_sample / 2048.0;  // 12 bit sample
+			//printf("nr_samples %d sample: %d %d \n", nr_samples, left_sample, right_sample);		
 		}
 	}
 	
 	return (npackages * nr_samples / 6); //return the number of IQ samples
+}
+
+
+int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *buffs, const size_t numElems, int &flags, const long long timeNs, const long timeoutUs)
+{
+	int iq = 0; 
+	int ret;
+	int left_sample;
+	int right_sample;
+	int nr_samples;
+	 
+	void const *buff_base = buffs[0];
+	float *target_buffer = (float *) buff_base;
+	
+	char tx_buffer[4];
+	
+	for (int ii = 0; ii < numElems * 2; ii++)
+	{
+		float f;
+		f = target_buffer[iq];
+		if (iq % 2)
+		{
+			f =  -1.0 * f;
+		}
+		iq++;
+		memcpy((void *)tx_buffer, (void *)&f, 4);	
+		// wrtie 4 bytes 1 sample per write
+		ret = write(fd_rb, tx_buffer, sizeof(tx_buffer));
+		if (ret == 0)
+		{
+			usleep(1000);  //50 samples sleep (1/48K about 20usec /sample * 50)
+		}
+	}
+	return numElems;
 }
