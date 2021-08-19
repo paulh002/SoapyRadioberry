@@ -5,11 +5,12 @@
 	
 	int irate = floor(rate);
 	uint32_t	ucom =0x00000004;
-	
+	uint32_t	command = 0;
+	 
 	 if (direction == SOAPY_SDR_TX)
 	 {
-		 if (rate < 48001.0)
-			 ucom = 0x00000004; 
+		 command = 1;
+		 ucom = 0x00000004; 
 	 }
 	 else
 	 {
@@ -23,7 +24,7 @@
 			 ucom = 0x03000004;		 
 	 }
 	
-	this->SoapyRadioberry::controlRadioberry(0, ucom);
+	 this->SoapyRadioberry::controlRadioberry(command, ucom);
 }
 
 SoapySDR::RangeList SoapyRadioberry::getSampleRateRange(const int direction, const size_t channel) const 
