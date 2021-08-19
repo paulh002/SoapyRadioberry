@@ -155,21 +155,20 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 	
 	char tx_buffer[4];
 	
-	for (int ii = 0; ii < numElems * 2; ii++)
+	for (int ii = 0; ii < numElems; ii++)
 	{
-		float f;
-		int	d;
-		f = target_buffer[iq];
-		if (iq % 2)
-		{
-			f =  -1.0 * f;
-		}
-		iq++;
-		d = f * 2048.0;
-		tx_buffer[0] = 0;
-		tx_buffer[1] = (d & 0xFF0000) >> 16;
-		tx_buffer[2] = (d & 0xFF00) >> 8;
-		tx_buffer[3] = (d & 0xFF);
+		float		i, q;
+		uint16_t	di, dq;
+		
+		di = target_buffer[iq++] * 32767.999f;
+		dq = target_buffer[iq++] * 32767.999f;
+		// i
+		tx_buffer[0] = (di & 0xFF00) >> 8;
+		tx_buffer[1] = (di & 0x00FF);
+		// q
+		tx_buffer[2] = (dq & 0xFF00) >> 8;
+		tx_buffer[3] = (dq & 0x00FF);
+		
 		// wrtie 4 bytes 1 sample per write
 		ret = write(fd_rb, tx_buffer, sizeof(tx_buffer));
 		if (ret == 0)

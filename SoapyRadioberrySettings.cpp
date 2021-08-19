@@ -217,10 +217,10 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	{ // 0 -7 TX RF gain 
 		
 		int v = (int)value;
-		if (v > 16) v = 16;
+		if (v > 15) v = 15;
 		if (v < 0) v = 0;
 		v = v << 28;
-		command = 0x15; 
+		command = 0x13; 
 		command_data = v; 
 	}
 	
