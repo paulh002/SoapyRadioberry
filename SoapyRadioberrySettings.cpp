@@ -215,13 +215,13 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	}
 	if(direction==SOAPY_SDR_TX) 
 	{ // 0 -7 TX RF gain 
-		
-		int v = (int)value;
-		if (v > 15) v = 15;
-		if (v < 0) v = 0;
-		v = v << 28;
+		uint32_t	z = (uint32_t)value;
+		if (value > 15) z = 15 << 28;
+		if (value < 0.0) z = 0;
+		printf("value = %f, z: %u\n", value, z);
+		z = z << 28;
 		command = 0x13; 
-		command_data = v; 
+		command_data = z; 
 	}
 	
 	this->SoapyRadioberry::controlRadioberry(command, command_data);

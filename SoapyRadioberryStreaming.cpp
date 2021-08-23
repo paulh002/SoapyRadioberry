@@ -146,7 +146,7 @@ int SoapyRadioberry::readStream(
 int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *buffs, const size_t numElems, int &flags, const long long timeNs, const long timeoutUs)
 {
 	int iq = 0; 
-	int ret;
+	size_t ret;
 	int left_sample;
 	int right_sample;
 	int nr_samples;
@@ -154,28 +154,27 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 	void const *buff_base = buffs[0];
 	float *target_buffer = (float *) buff_base;
 	
-	char tx_buffer[4];
-	
+	unsigned char tx_buffer[4];
 	for (int ii = 0; ii < numElems; ii++)
 	{
 		float		i, q;
-		uint16_t	di, dq;
+		int16_t		di, dq;
 		
-		di = target_buffer[iq++] * 32767.999f;
-		dq = target_buffer[iq++] * 32767.999f;
+		di = (int16_t)(target_buffer[iq++] * 32767.999f);
+		dq = (int16_t)(target_buffer[iq++] * 32767.999f);
 		// i
 		tx_buffer[0] = (di & 0xFF00) >> 8;
 		tx_buffer[1] = (di & 0x00FF);
 		// q
 		tx_buffer[2] = (dq & 0xFF00) >> 8;
 		tx_buffer[3] = (dq & 0x00FF);
-		
-		// wrtie 4 bytes 1 sample per write
 		ret = write(fd_rb, tx_buffer, sizeof(tx_buffer));
 		if (ret == 0)
 		{
+			printf("radioberry buffer full\n");
 			usleep(1000);  //50 samples sleep (1/48K about 20usec /sample * 50)
 		}
 	}
+	//usleep((useconds_t)((double)numElems * 21.333));
 	return numElems;
 }
