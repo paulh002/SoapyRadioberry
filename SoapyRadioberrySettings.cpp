@@ -11,6 +11,7 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
 	
 	no_channels = 1;
+	m_count = 0;
 	fd_rb = open("/dev/radioberry", O_RDWR);
 	try
 	{
@@ -198,7 +199,7 @@ SoapySDR::Range SoapyRadioberry::getGainRange( const int direction, const size_t
 	
 	if(direction==SOAPY_SDR_RX)
 		return(SoapySDR::Range(-12, 48));
-	return(SoapySDR::Range(0,16));
+	return(SoapySDR::Range(0,15));
 }
 
 void SoapyRadioberry::setGain( const int direction, const size_t channel, const double value ) {
@@ -216,9 +217,8 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	if(direction==SOAPY_SDR_TX) 
 	{ // 0 -7 TX RF gain 
 		uint32_t	z = (uint32_t)value;
-		if (value > 15) z = 15 << 28;
+		if (value > 15) z = 15;
 		if (value < 0.0) z = 0;
-		printf("value = %f, z: %u\n", value, z);
 		z = z << 28;
 		command = 0x13; 
 		command_data = z; 

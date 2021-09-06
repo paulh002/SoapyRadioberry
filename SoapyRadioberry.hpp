@@ -16,6 +16,11 @@
 #define TX_MAX_BUFFER (TX_MAX * 8)
 const int npackages = 4;
 
+typedef enum radioberrysdrStreamFormat {
+	RADIOBERRY_SDR_CF32,
+	RADIOBERRY_SDR_CS16
+} radioberrysdrStreamFormat;
+
 class SoapyRadioberry : public SoapySDR::Device{
 
 	public:
@@ -131,11 +136,13 @@ class SoapyRadioberry : public SoapySDR::Device{
 	
 	private:
 	
-	int fd_rb;	
-	int sample_rate;
-	int rx_frequency;
-	int no_channels;	
+	int		fd_rb;	
+	int		sample_rate;
+	int		rx_frequency;
+	int		no_channels;	
 	struct rb_info_arg_t rb_control;
 	std::unique_ptr<rpihw::driver::i2c> i2c_ptr;
-	bool	i2c_available = false;
+	bool							i2c_available = false;
+	radioberrysdrStreamFormat		streamFormat;
+	uint32_t		m_count;
 };
