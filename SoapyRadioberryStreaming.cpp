@@ -226,8 +226,8 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			m_count++;
 			if (ret == 0)
 			{
-				printf("radioberry buffer full\n");
-				usleep(1000);      //50 samples sleep (1/48K about 20usec /sample * 50)
+				//printf("radioberry buffer full\n");
+				usleep(19200);       //50 samples sleep (1/48K about 20usec /sample * 50)
 			}
 			if(m_count > 2048)
 			{

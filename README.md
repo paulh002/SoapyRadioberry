@@ -21,4 +21,20 @@ Installation of libraries is necessary:
 - SoapySDR
 
 
+## Installation instructions
+
+```
+git clone <>
+cd <sub folder>
+mkdir build
+cd build
+cmake ..
+make -j4
+sudo make install
+```
+
+## Dependencies
+
+Need the radioberry device driver.
+
 https://www.youtube.com/watch?v=ds-n-7sHXl8&t=2s
