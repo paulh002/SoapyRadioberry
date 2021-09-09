@@ -215,25 +215,24 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 		{
 			//printf("%x %x %x %x\n", (itarget_buffer[j] & 0xFF00) >> 8, (itarget_buffer[j] & 0x00FF), (itarget_buffer[j+1] & 0xFF00) >> 8, (itarget_buffer[j+1] & 0x00FF));
 			
-			tx.i8TxBuffer[2] = (unsigned char)((itarget_buffer[j] & 0xff00) >> 8);
-			tx.i8TxBuffer[3] = (unsigned char)(itarget_buffer[j] & 0xff);
-			tx.i8TxBuffer[0] = (unsigned char)((itarget_buffer[j + 1] & 0xff00) >> 8);
-			tx.i8TxBuffer[1] = (unsigned char)(itarget_buffer[j + 1] & 0xff); 
+			tx.i8TxBuffer[0] = (unsigned char)((itarget_buffer[j] & 0xff00) >> 8);
+			tx.i8TxBuffer[1] = (unsigned char)(itarget_buffer[j] & 0xff);
+			tx.i8TxBuffer[2] = (unsigned char)((itarget_buffer[j + 1] & 0xff00) >> 8);
+			tx.i8TxBuffer[3] = (unsigned char)(itarget_buffer[j + 1] & 0xff); 
 				
-			ret = write(fd_rb, &tx, sizeof(uint32_t));
-				
+			ret = write(fd_rb, &tx, sizeof(uint32_t));	
 			j += 2;
 			m_count++;
 			if (ret == 0)
 			{
 				//printf("radioberry buffer full\n");
-				usleep(19200);       //50 samples sleep (1/48K about 20usec /sample * 50)
+				usleep(20000);        //50 samples sleep (1/48K about 20usec /sample * 50)
 			}
-			if(m_count > 2048)
+			/*if(m_count > 2048)
 			{
 				m_count -=  1024;
 				usleep(19200);     //64 samples sleep (1/48K about 20usec /sample * 64)
-			}
+			}*/
 		}
 	}
 	return numElems;
