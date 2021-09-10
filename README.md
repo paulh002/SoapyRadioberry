@@ -10,11 +10,12 @@ To install you need to configure rasberry pi OS in text only mode, (switch of th
 Compiled using VisualGDB
 
 ToDo:
-- Transmitter part
+- Test transmittion with update of radioberry gateware
 
 Done:
 - Bug fix for dev version of Radioberry
 - added multiple samplerates
+- Transmitter part
 
 
 Installation of libraries is necessary:
