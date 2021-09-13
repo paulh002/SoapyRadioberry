@@ -1,6 +1,6 @@
 #include "SoapyRadioberry.hpp"
 
-	
+#define RADIOBERRY_BUFFER_SIZE	4096	
 
 /***********************************************************************
  * Device interface
@@ -12,6 +12,10 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	
 	no_channels = 1;
 	m_count = 0;
+	m_lowwater = RADIOBERRY_BUFFER_SIZE / 3; 
+	m_highwater = (RADIOBERRY_BUFFER_SIZE * 2) / 3 ;  // assume 64 K buffer
+	m_sleep = (__useconds_t)(1000000.0 / 48000.0 * (double)(m_highwater - m_lowwater));
+	m_sleep = m_sleep - m_sleep / 10;
 	fd_rb = open("/dev/radioberry", O_RDWR);
 	try
 	{

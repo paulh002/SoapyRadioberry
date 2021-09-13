@@ -145,4 +145,6 @@ class SoapyRadioberry : public SoapySDR::Device{
 	bool							i2c_available = false;
 	radioberrysdrStreamFormat		streamFormat;
 	uint32_t		m_count;
+	uint32_t		m_highwater, m_lowwater;
+	__useconds_t	m_sleep;
 };
