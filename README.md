@@ -40,6 +40,7 @@ To install correct radioberry drivers for this SoapySDR library:
 cd <sub folder>
 cd radioberry
 ./install.sh
+```
 
 ## Dependencies
 
