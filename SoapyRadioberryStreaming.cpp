@@ -212,10 +212,19 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			tx.i16TxBuffer[0] = (int16_t)(target_buffer[iq++] * 16384.0f);
 			tx.i16TxBuffer[1] = (int16_t)(target_buffer[iq++] * 16384.0f);
 			ret = write(fd_rb, &tx, 4 * sizeof(uint8_t));
+			m_count++;
 			if (ret == 0)
 			{
-				printf("radioberry buffer full\n");
-				usleep(1000);   //50 samples sleep (1/48K about 20usec /sample * 50)
+				auto now = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double> timePassed = now - startTime;
+				
+				printf("Time passed %4.2f radioberry buffer full count %d", timePassed.count(), m_count);
+				fflush(NULL);
+			}
+			if(m_count > m_highwater)
+			{
+				m_count =  m_lowwater;
+				usleep(m_sleep); 
 			}
 		}
 	}
