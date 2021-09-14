@@ -35,7 +35,7 @@ cd build
 cmake ..
 make -j4
 sudo make install
-```
+
 To install correct radioberry drivers for this SoapySDR library:
 cd <sub folder>
 cd radioberry
