@@ -18,7 +18,6 @@
 	 {
 		 command = 1;
 		 ucom = 0x00000004; 
-		 return;
 	 }
 	 else
 	 {
@@ -245,16 +244,8 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			ret = write(fd_rb, &tx, sizeof(uint32_t));	
 			j += 2;
 			m_count++;
-			if (ret == 0)
-			{
-				auto now = std::chrono::high_resolution_clock::now();
-				std::chrono::duration<double> timePassed = now - startTime;
-				
-				printf("Time passed %4.2f radioberry buffer full count %d", timePassed.count(), m_count);
-				fflush(NULL);
-			}
 			// Measure the time until a high watermark apears
-			if(m_count > m_highwater)
+			if ((m_count > m_highwater) || (ret == 0))
 			{
 				auto now = std::chrono::high_resolution_clock::now();
 				//auto timePassed = std::chrono::duration_cast<std::chrono::microseconds>(now - startTime);
