@@ -141,6 +141,26 @@ std::vector<double> SoapyRadioberry::listBandwidths( const int direction, const 
 	return(options);
 }
 
+std::vector<double> SoapyRadioberry::listSampleRates( const int direction, const size_t channel ) const
+{
+	
+	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::listSampleRates called");
+	
+	
+	std::vector<double> options;
+	
+	if (direction == SOAPY_SDR_RX) {
+		options.push_back(0.048e6);  
+		options.push_back(0.096e6);
+		options.push_back(0.192e6);
+		options.push_back(0.384e6);
+	}
+	if (direction == SOAPY_SDR_TX) {
+		options.push_back(0.048e6);  
+	}
+	return(options);
+}
+
 double SoapyRadioberry::getBandwidth( const int direction, const size_t channel ) const
 {
 	

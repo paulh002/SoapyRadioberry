@@ -41,8 +41,8 @@ SoapySDR::RangeList SoapyRadioberry::getSampleRateRange(const int direction, con
 	
 	SoapySDR::RangeList rangeList;
 	
-	if (direction == SOAPY_SDR_RX) 	rangeList.push_back(SoapySDR::Range(48000.0, 192000.0, 1.0));
-	if (direction == SOAPY_SDR_TX) 	rangeList.push_back(SoapySDR::Range(48000.0, 48000.0, 1.0));
+	if (direction == SOAPY_SDR_RX) 	rangeList.push_back(SoapySDR::Range(48000.0, 384000.0, 48000.0));
+	if (direction == SOAPY_SDR_TX) 	rangeList.push_back(SoapySDR::Range(48000.0, 48000.0, 48000.0));
 	
 	return rangeList;
 }
