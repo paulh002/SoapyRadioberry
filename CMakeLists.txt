@@ -38,6 +38,8 @@ SOAPY_SDR_MODULE_UTIL(
 	SoapyRadioberrySettings.cpp
 	SoapyRadioberryStreaming.cpp
 	radioberry_ioctl.h
+        i2c.cpp
+        i2c.h
     
 )
 #LIBRARIES ${MY_DEVICE_LIBRARIES}
