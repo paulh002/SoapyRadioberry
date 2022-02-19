@@ -50,5 +50,8 @@
     <ClInclude Include="i2c.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="SoapySDR\Errors.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

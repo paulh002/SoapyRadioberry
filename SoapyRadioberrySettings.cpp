@@ -104,9 +104,9 @@ size_t SoapyRadioberry::getNumChannels( const int direction ) const
 {
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::getNumChannels called");
 	
-	//if (direction == SOAPY_SDR_RX) return(4);
+	if (direction == SOAPY_SDR_RX) return(4);
 	
-	return(1); //1 RX and 1 TX channel; making this for standalone radioberry!
+	return(1);
 }
 
 bool SoapyRadioberry::getFullDuplex( const int direction, const size_t channel ) const

@@ -5,13 +5,15 @@
 #include <cstdlib>
 #include <chrono>
 #include <iostream>
+#include <SoapySDR/Config.h>
+#include <SoapySDR/Errors.h>
 #include "SoapyRadioberry.hpp"
 
  void SoapyRadioberry::setSampleRate( const int direction, const size_t channel, const double rate ) {
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::setSampleRate called");
 	
 	int irate = floor(rate);
-	uint32_t	ucom =0x00000004;
+	uint32_t	ucom =0x00000004, urec = 0;
 	uint32_t	command = 0;
 	 
 	 if (direction == SOAPY_SDR_TX)
@@ -21,16 +23,75 @@
 	 }
 	 else
 	 {
+		 if (channel > 4)
+		 {
+			 SoapySDR_log(SOAPY_SDR_ERROR, "Invalid channel.");
+			 return;
+		 }
+
+		 if (channel > 1 && streamFormat != RADIOBERRY_SDR_CF32)
+		 {
+			 SoapySDR_log(SOAPY_SDR_ERROR, "Invalid format for multiple receivers only CF32 allowed");
+			 return;
+		 }
+		 
+		 switch (channel)
+		 {
+		 case 0:
+			 urec = 0x00;
+			 m_receivers = 1;
+			 break;
+		 case 1:
+			 urec = 0x08;
+			 m_receivers = 2;
+			 break;
+		 case 2:
+			 urec = 0x10;
+			 m_receivers = 2;
+			 break;
+		 case 3:
+			 urec = 0x18;
+			 m_receivers = 4;
+			 break;
+		 }
+
+		 char str[80];
+		 sprintf(str, "SoapyRadioberry::Number of receivers is %d", m_receivers);
+		 SoapySDR_log(SOAPY_SDR_INFO, str);
+
 		 if (rate < 48001.0)
-			 ucom = 0x00000004;
+			 ucom = 0x00000004 | urec;
 		 if (rate > 48000.0 && rate < 96001.0)
-			 ucom = 0x01000004;
+		 {
+			 ucom = 0x01000004 | urec;
+			 if (m_receivers > 4)
+			 {
+				 SoapySDR_log(SOAPY_SDR_ERROR, "Sample rate not supported for more than 4 streams.");
+				 m_receivers = 1;
+				 return;
+			 }
+		 }
 		 if (rate > 96000.0 && rate < 192001.0)
-			 ucom = 0x02000004;
+		 {
+			 ucom = 0x02000000 | urec;
+			 if (m_receivers > 2)
+			 {
+				 SoapySDR_log(SOAPY_SDR_ERROR, "Sample rate not supported for more than 2 streams.");
+				 m_receivers = 1;
+				 return;
+			 }
+		 }
 		 if (rate > 192000.0)
-			 ucom = 0x03000004;		 
+		 {
+			 ucom = 0x03000004 | urec;
+			 if (m_receivers > 1)
+			 {
+				 SoapySDR_log(SOAPY_SDR_ERROR, "Sample rate not supported for multiple streams.");
+				 m_receivers = 1;
+				 return;
+			 }
+		 }
 	 }
-	
 	 this->SoapyRadioberry::controlRadioberry(command, ucom);
 }
 
@@ -129,22 +190,44 @@ int SoapyRadioberry::readStream(
 		const long timeoutUs )
 {
 	int i;
-	int iq = 0;
+	int iq{0}, iq2{0}, iq3{0}, iq4{0}, sample_no{0};
 	int16_t left_sample;
 	int16_t right_sample;
 	int nr_samples;
 	 
 	void *buff_base = buffs[0];
-	float	*target_buffer = (float *) buff_base;
-	int16_t *itarget_buffer = (int16_t *) buff_base;
+	void *buff_base2 {nullptr};
+	void *buff_base3 {nullptr};
+	void *buff_base4 {nullptr};
+	float *target_buffer{nullptr}, *target_buffer2{nullptr}, *target_buffer3{nullptr}, *target_buffer4{nullptr};
+
+	target_buffer = (float *)buff_base;
+	int16_t *itarget_buffer = (int16_t *)buff_base;
+
+	switch (m_receivers)
+	{
+	case 4:
+		buff_base4 = buffs[3];
+		target_buffer4 = (float *)buff_base4;
+	case 3:
+		buff_base3 = buffs[2];
+		target_buffer3 = (float *)buff_base3;
+		break;
+	case 2:
+		buff_base2 = buffs[1];
+		target_buffer2 = (float *)buff_base2;
+		break;
+	}
+
 	
 	char rx_buffer[512];
-	for(int ii = 0 ; ii < npackages ; ii++)
+	for(int ii = 0 ; ii < (npackages * m_receivers); ii++)
 	{
 		nr_samples = read(fd_rb, rx_buffer, sizeof(rx_buffer));
 		//printf("nr_samples %d sample: %d %d %d %d %d %d\n",nr_samples, (int)rx_buffer[0],(int)rx_buffer[1],(int)rx_buffer[2],(int)rx_buffer[3],(int)rx_buffer[4],(int)rx_buffer[5]);
 		if(streamFormat == RADIOBERRY_SDR_CF32)
 		{
+			sample_no = 0;
 			for (i = 0; i < nr_samples; i += 6) {
 				left_sample   = (int)((signed char) rx_buffer[i]) << 16;
 				left_sample  |= (int)((((unsigned char)rx_buffer[i + 1]) << 8) & 0xFF00);
@@ -153,10 +236,50 @@ int SoapyRadioberry::readStream(
 				right_sample |= (int)((((unsigned char)rx_buffer[i + 4]) << 8) & 0xFF00);
 				right_sample |= (int)((unsigned char)rx_buffer[i + 5] & 0xFF);
 				right_sample =  right_sample * -1;
-			
-				target_buffer[iq++] = (float)left_sample / 2048.0;      // 12 bit sample
-				target_buffer[iq++] = (float)right_sample / 2048.0;      // 12 bit sample
-				//printf("nr_samples %d sample: %d %d \n", nr_samples, left_sample, right_sample);		
+
+				if (sample_no == 0)
+				{
+					target_buffer[iq++] = (float)left_sample / 2048.0;  // 12 bit sample
+					target_buffer[iq++] = (float)right_sample / 2048.0; // 12 bit sample
+				}
+				if (sample_no == 1)
+				{
+					target_buffer2[iq2++] = (float)left_sample / 2048.0;  // 12 bit sample
+					target_buffer2[iq2++] = (float)right_sample / 2048.0; // 12 bit sample
+				}
+				if (sample_no == 2)
+				{
+					target_buffer3[iq3++] = (float)left_sample / 2048.0;  // 12 bit sample
+					target_buffer3[iq3++] = (float)right_sample / 2048.0; // 12 bit sample
+				}
+				if (sample_no == 4)
+				{
+					target_buffer4[iq4++] = (float)left_sample / 2048.0;  // 12 bit sample
+					target_buffer4[iq4++] = (float)right_sample / 2048.0; // 12 bit sample
+				}
+				//printf("nr_samples %d sample: %d %d \n", nr_samples, left_sample, right_sample);
+				if (m_receivers == 1)
+					sample_no = 0;				
+				if (m_receivers == 2 && sample_no == 0)
+					sample_no = 1;
+				else if (m_receivers == 2 && sample_no == 1)
+						sample_no = 0;
+
+				if (m_receivers == 3 && sample_no == 0)
+					sample_no = 1;
+				else if (m_receivers == 3 && sample_no == 1)
+					sample_no = 2;
+				else if (m_receivers == 3 && sample_no == 2)
+					sample_no = 0;
+				
+				if (m_receivers == 4 && sample_no == 0)
+					sample_no = 1;
+				else if (m_receivers == 4 && sample_no == 1)
+					sample_no = 2;
+				else if (m_receivers == 4 && sample_no == 2)
+					sample_no = 3;
+				else if (m_receivers == 4 && sample_no == 3)
+					sample_no = 0;
 			}
 		}
 		if (streamFormat == RADIOBERRY_SDR_CS16)
@@ -222,8 +345,8 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			
 			tx.i8TxBuffer[0] = (unsigned char)((itarget_buffer[j] & 0xff00) >> 8);
 			tx.i8TxBuffer[1] = (unsigned char)(itarget_buffer[j] & 0xff);
-			tx.i8TxBuffer[2] = (unsigned char)((itarget_buffer[j + 1] & 0xff00) >> 8);
-			tx.i8TxBuffer[3] = (unsigned char)(itarget_buffer[j + 1] & 0xff); 
+			tx.i8TxBuffer[2] = (unsigned char)(((-1 * itarget_buffer[j + 1]) & 0xff00) >> 8);
+			tx.i8TxBuffer[3] = (unsigned char)(( -1 * itarget_buffer[j + 1]) & 0xff); 
 				
 			ret = write(fd_rb, &tx, sizeof(uint32_t));	
 			j += 2;
