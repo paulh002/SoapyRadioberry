@@ -1,0 +1,5 @@
+unloading kernel driver: sudo modprobe -r radioberry
+loading kernel driver: sudo modprobe radioberry (during start the gateware is loaded)
+sudo chmod 
+show driver messages
+dmesg -wH &
