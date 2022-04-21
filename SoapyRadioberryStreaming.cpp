@@ -15,23 +15,18 @@
 	uint32_t	command = 0;
 	 
 	 if (direction == SOAPY_SDR_TX)
-	 {
 		 command = 1;
-		 ucom = 0x00000004; 
-	 }
-	 else
-	 {
-		 if (rate < 48001.0)
-			 ucom = 0x00000004;
-		 if (rate > 48000.0 && rate < 96001.0)
-			 ucom = 0x01000004;
-		 if (rate > 96000.0 && rate < 192001.0)
-			 ucom = 0x02000004;
-		 if (rate > 192000.0)
-			 ucom = 0x03000004;		 
-	 }
-	
-	 this->SoapyRadioberry::controlRadioberry(command, ucom);
+
+	// incase of transmit still the receive samplerate need to be send
+	if (rate < 48001.0)
+		ucom = 0x00000004;
+	if (rate > 48000.0 && rate < 96001.0)
+		ucom = 0x01000004;
+	if (rate > 96000.0 && rate < 192001.0)
+		ucom = 0x02000004;
+	if (rate > 192000.0)
+		ucom = 0x03000004;		 
+	this->SoapyRadioberry::controlRadioberry(command, ucom);
 }
 
 SoapySDR::RangeList SoapyRadioberry::getSampleRateRange(const int direction, const size_t channel) const 
