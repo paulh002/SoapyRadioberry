@@ -7,7 +7,8 @@
  **********************************************************************/
  
 SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
-	
+
+	SoapySDR_setLogLevel(SOAPY_SDR_ERROR);
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
 	
 	no_channels = 1;
