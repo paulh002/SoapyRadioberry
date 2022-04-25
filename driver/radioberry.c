@@ -208,14 +208,21 @@ static long radioberry_ioctl(struct file *fp, unsigned int cmd, unsigned long ar
 			rb_info_ret.fpga = data[3] & 0x03; 
 			rb_info_ret.version = 94; 
 			
-			if (copy_to_user((struct rb_info_arg_t *)arg, &rb_info_ret, sizeof(struct rb_info_arg_t))) return -EACCES;
+			if (copy_to_user((struct rb_info_arg_t *)arg, &rb_info_ret, sizeof(struct rb_info_arg_t))) 
+			{
+				kfree(rb_info);
+				return -EACCES;
+			}
 	
 			break;
 
 		default:
+		{
+			kfree(rb_info);
 			return -ENOTTY;
+		}
 	}
-
+	kfree(rb_info);
 	return 0;
 }
 
