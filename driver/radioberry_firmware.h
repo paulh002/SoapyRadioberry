@@ -162,7 +162,7 @@ void read_iq_sample(int lnrx, int iqs, unsigned char iqdata[]){
 		iqdata[i] |=  (((value >> 13) & 1) << 2);
 		iqdata[i] |=  (((value >> 12) & 1) << 1);
 		iqdata[i] |=  (((value >> 5) & 1));						
-	}		
+	}	
 }
 
 int write_iq_sample(unsigned char tx_iqdata[]) {

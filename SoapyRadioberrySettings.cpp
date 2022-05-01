@@ -1,4 +1,7 @@
 #include "SoapyRadioberry.hpp"
+#include <chrono>
+#include <thread>
+#include <string>
 
 #define RADIOBERRY_BUFFER_SIZE	4096	
 
@@ -8,7 +11,7 @@
  
 SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 
-	SoapySDR_setLogLevel(SOAPY_SDR_ERROR);
+	SoapySDR_setLogLevel(SOAPY_SDR_INFO);
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
 	
 	no_channels = 1;
@@ -22,7 +25,7 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	{
 		printf("I2c not found %s", s.c_str());
 		i2c_available = false;
-	}
+	}	
 }
 
 SoapyRadioberry::~SoapyRadioberry(void){
@@ -33,8 +36,9 @@ SoapyRadioberry::~SoapyRadioberry(void){
 }
 
 void SoapyRadioberry::controlRadioberry(uint32_t command, uint32_t command_data) {
-	
-	//SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::controlRadioberry called");
+
+	std::unique_lock<std::mutex> soapy_lock(send_command);
+	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::controlRadioberry called");
 	
 	uint32_t CWX =0;
 	uint32_t running = 1;
@@ -43,11 +47,11 @@ void SoapyRadioberry::controlRadioberry(uint32_t command, uint32_t command_data)
 	rb_control.command = command;
 	rb_control.command_data = command_data;
 
-	//fprintf(stderr, "RB-Command = %02X Command = %02X  command_data = %08X Mox %d\n", rb_control.rb_command, command >> 1, command_data, command & 0x01);
+	fprintf(stderr, "RB-Command = %02X Command = %02X  command_data = %08X Mox %d\n", rb_control.rb_command, command >> 1, command_data, command & 0x01);
 	
 	if (ioctl(fd_rb, RADIOBERRY_IOC_COMMAND, &rb_control) == -1) {
 		SoapySDR_log(SOAPY_SDR_INFO, "Could not sent command to radioberry device.");
-	} //else SoapySDR_log(SOAPY_SDR_INFO, "Command sent succesfull to radioberry device.");
+	} else SoapySDR_log(SOAPY_SDR_INFO, "Command sent succesfull to radioberry device.");
 }
 
 std::string SoapyRadioberry::getDriverKey( void ) const
@@ -70,13 +74,20 @@ SoapySDR::Kwargs SoapyRadioberry::getHardwareInfo( void ) const
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::getHardwareInfo called");
 	
 	SoapySDR::Kwargs info;
-	
+	int count = 0;
 	struct rb_info_arg_t rb_info;
 	
-	if (ioctl(fd_rb, RADIOBERRY_IOC_COMMAND, &rb_info) == -1) {
-		rb_info.major = 0;
-		rb_info.minor = 0;
-	}		
+	do
+	{
+		std::memset(&rb_info, 0, sizeof(rb_info));
+		if (ioctl(fd_rb, RADIOBERRY_IOC_COMMAND, &rb_info) == -1)
+		{
+			rb_info.major = 0;
+			rb_info.minor = 0;
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		count++;
+	} while ((rb_info.major == 0 || rb_info.major > 128) && count < 20);
 
 	unsigned int major, minor;
 	major = rb_info.major;
