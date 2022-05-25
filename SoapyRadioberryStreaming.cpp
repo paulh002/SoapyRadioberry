@@ -114,8 +114,28 @@ SoapySDR::Stream *SoapyRadioberry::setupStream(
 			"setupStream invalid format '" + format + "' -- Only CF32 is supported by SoapyRadioberrySDR module.");
 	}
 
-	return (SoapySDR::Stream *) this;
+	sdr_stream *ptr;
+	ptr = new sdr_stream(direction);
+	streams.push_back(ptr);
+	return (SoapySDR::Stream *)ptr;
+}
 
+void SoapyRadioberry::closeStream(SoapySDR::Stream *stream)
+{
+	int i = 0;
+	for (auto con : streams)
+	{
+		if ((sdr_stream *)stream == con)
+		{
+			if (((sdr_stream *)stream)->get_direction() == SOAPY_SDR_TX)
+			{	// switch off TX stream
+				setSampleRate(SOAPY_SDR_RX, 0, sample_rate);	
+			}
+			delete ((sdr_stream *)stream);
+			streams.erase(streams.begin() + i);
+		}
+		i++;
+	}
 }
 
 int SoapyRadioberry::readStream(

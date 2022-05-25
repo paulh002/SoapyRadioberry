@@ -28,10 +28,11 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	}	
 }
 
-SoapyRadioberry::~SoapyRadioberry(void){
-	
+SoapyRadioberry::~SoapyRadioberry(void)
+{
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  destructor called");
-	
+	for (auto con : streams)
+		delete (con);
 	if (fd_rb != 0) close(fd_rb);
 }
 
@@ -130,21 +131,10 @@ bool SoapyRadioberry::getFullDuplex( const int direction, const size_t channel )
 
 std::vector<double> SoapyRadioberry::listBandwidths( const int direction, const size_t channel ) const
 {
-	
+	// radioberry does nor support bandwidth
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::listBandwidths called");
-	
-	
+		
 	std::vector<double> options;
-	
-	if (direction == SOAPY_SDR_RX) {
-		options.push_back(0.048e6);  
-		options.push_back(0.096e6);
-		options.push_back(0.192e6);
-		options.push_back(0.384e6);
-	}
-	if (direction == SOAPY_SDR_TX) {
-		options.push_back(0.048e6);  
-	}
 	return(options);
 }
 
