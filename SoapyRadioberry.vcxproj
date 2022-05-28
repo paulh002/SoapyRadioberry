@@ -57,6 +57,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="i2c.cpp" />
     <ClCompile Include="SoapyRadioberry.cpp" />
     <ClCompile Include="SoapyRadioberrySettings.cpp" />
     <ClCompile Include="SoapyRadioberryStreaming.cpp" />
@@ -66,6 +67,7 @@
     <None Include="SoapyRadioberry-Release.vgdbsettings" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="i2c.h" />
     <ClInclude Include="radioberry_ioctl.h" />
     <ClInclude Include="SoapyRadioberry.hpp" />
   </ItemGroup>
