@@ -10,8 +10,9 @@
 #include <memory>
 #include <string.h>
 #include <mutex>
+#include <cstring>
 #include "radioberry_ioctl.h"
-#include "i2c.h"
+
 
 #define TX_MAX 4800
 #define TX_MAX_BUFFER (TX_MAX * 8)
@@ -30,9 +31,12 @@ class sdr_stream
 		direction = dir;
 	}
 	int get_direction() { return direction; }
+	void set_stream_format(radioberrysdrStreamFormat sf) { streamFormat = sf; };
+	radioberrysdrStreamFormat get_stream_format() { return streamFormat; };
 
   private:
 	int direction;
+	radioberrysdrStreamFormat streamFormat;
 };
 
 
@@ -138,13 +142,6 @@ class SoapyRadioberry : public SoapySDR::Device
 
 	void controlRadioberry(uint32_t command, uint32_t command_data);
 		
-	/*******************************************************************
-	 * I2C API
-	 ******************************************************************/
-	
-		std::string readI2C(const int addr, const size_t numBytes);
-		void writeI2C(const int addr, const std::string &data);
-	
 	private:
 	
 	int			fd_rb;	
@@ -152,9 +149,7 @@ class SoapyRadioberry : public SoapySDR::Device
 	int			rx_frequency;
 	int			no_channels;	
 	struct rb_info_arg_t rb_control;
-	std::unique_ptr<rpihw::driver::i2c> i2c_ptr;
-	bool							i2c_available = false;
-	radioberrysdrStreamFormat		streamFormat;
 	std::mutex	send_command;
 	std::vector<sdr_stream *> streams;
+	bool mox;
 };

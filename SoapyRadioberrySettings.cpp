@@ -13,19 +13,9 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 
 	SoapySDR_setLogLevel(SOAPY_SDR_INFO);
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
-	
+	mox = false;
 	no_channels = 1;
 	fd_rb = open("/dev/radioberry", O_RDWR);
-	try
-	{
-		i2c_ptr = std::make_unique<rpihw::driver::i2c> (rpihw::driver::i2c("/dev/i2c-1"));
-		i2c_available = true;
-	}
-	catch (std::string s)
-	{
-		printf("I2c not found %s", s.c_str());
-		i2c_available = false;
-	}	
 }
 
 SoapyRadioberry::~SoapyRadioberry(void)
@@ -232,17 +222,24 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 	
 	if (direction == SOAPY_SDR_RX)	 
 	{
-		command = 0x14; 
+		if (mox)
+			command = 0x15;
+		else
+			command = 0x14;
 		command_data = (0x40 | (((uint32_t)value + 12) & 0x3F));
 	}
+	
 	if(direction==SOAPY_SDR_TX) 
-	{ // 0 -7 TX RF gain 
+	{ // 0 -7 TX RF gain
+		if (!mox)
+			return;
+
 		uint32_t	z = (uint32_t)value;
 		if (value > 15) z = 15;
 		if (value < 0.0) z = 0;
 		z = z << 28;
 		command = 0x13; 
-		command_data = z; 
+		command_data = z;
 	}
 	
 	this->SoapyRadioberry::controlRadioberry(command, command_data);
@@ -256,52 +253,26 @@ void SoapyRadioberry::setFrequency( const int direction, const size_t channel,  
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::setFrequency called");
 	
 	uint32_t command = 0;
-	
-	if(direction==SOAPY_SDR_RX)	command = 4;
-	if(direction==SOAPY_SDR_TX)	command = 3;
-	
+
+	if (direction == SOAPY_SDR_RX)
+	{
+		if (mox)
+			command = 5;
+		else
+			command = 4;
+	}
+
+	if (direction == SOAPY_SDR_TX)
+	{
+		if (!mox)
+			return;
+		command = 3;
+	}
+
 	uint32_t command_data = (uint32_t) frequency;
 	
 	this->SoapyRadioberry::controlRadioberry(command, command_data);
 }
 
-void SoapyRadioberry::writeI2C(const int addr, const std::string &data)
-{
-	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::writeI2C called"); 
-	
-	if (!i2c_available)
-		return;
-	i2c_ptr->addr(addr);
-	try
-	{
-		i2c_ptr->write((uint8_t *)data.c_str(), data.size());	
-	}
-	catch (std::string s)
-	{
-	printf("%s", s.c_str());
-	}	
-}
-
-std::string SoapyRadioberry::readI2C(const int addr, const size_t numBytes)
-{
-	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::readI2C called"); 
-	
-	std::string data;
-		
-	if (!i2c_available)
-		return std::string("");
-	i2c_ptr->addr(addr);
-	data.reserve(numBytes);
-	try
-	{
-		i2c_ptr->read((uint8_t *)data.c_str(), numBytes);
-		data.resize(numBytes);
-	}
-	catch (std::string s)
-	{
-		printf("%s", s.c_str());
-	}	
-	return data;
-}
 // end of source.
 
