@@ -245,7 +245,7 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			tx.i8TxBuffer[2] = (unsigned char)(((-1 * itarget_buffer[j + 1]) & 0xff00) >> 8);
 			tx.i8TxBuffer[3] = (unsigned char)((-1 * itarget_buffer[j + 1]) & 0xff);
 
-			ret = 4; //write(fd_rb, &tx, sizeof(uint32_t));
+			ret = write(fd_rb, &tx, sizeof(uint32_t));
 			j += 2;
 		}
 	}
