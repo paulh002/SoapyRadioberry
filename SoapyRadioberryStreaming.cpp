@@ -113,6 +113,7 @@ SoapySDR::Stream *SoapyRadioberry::setupStream(
 	if (format == SOAPY_SDR_CF32) {
 		SoapySDR_log(SOAPY_SDR_INFO, "Using format CF32.");
 		ptr->set_stream_format(RADIOBERRY_SDR_CF32);
+		mox = true;
 	}
 	else if(format == SOAPY_SDR_CS16 && direction == SOAPY_SDR_TX)
 	{
@@ -202,7 +203,7 @@ int SoapyRadioberry::readStream(
 				itarget_buffer[iq++] = (int16_t)(right_sample >> 8);    // 16 bit sample
 			}
 		}
-		//printf("nr_samples %d sample: %d %d \n", nr_samples, left_sample, right_sample);
+		//printf("nr_samples %d sample: %f %f \n", nr_samples, (float)left_sample / 8388608.0, (float)right_sample / 8388608.0);
 	}
 	return (npackages * nr_samples); //return the number of IQ samples
 }

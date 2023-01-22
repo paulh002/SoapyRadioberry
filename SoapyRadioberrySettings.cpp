@@ -14,9 +14,18 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	SoapySDR_setLogLevel(SOAPY_SDR_INFO);
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
 	mox = false;
-	i2c_available = false;
 	no_channels = 1;
 	fd_rb = open("/dev/radioberry", O_RDWR);
+	try
+	{
+		i2c_ptr = std::make_unique<rpihw::driver::i2c>(rpihw::driver::i2c("/dev/i2c-1"));
+		i2c_available = true;
+	}
+	catch (std::string s)
+	{
+		printf("I2c not found %s", s.c_str());
+		i2c_available = false;
+	}
 }
 
 SoapyRadioberry::~SoapyRadioberry(void)
