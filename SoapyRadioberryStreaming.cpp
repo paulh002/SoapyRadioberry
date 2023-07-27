@@ -159,7 +159,8 @@ int SoapyRadioberry::readStream(
 		const long timeoutUs )
 {
 	int nr_samples, no_bytes, iq=0;
-	 
+	int npackages = numElems / 63;
+
 	void *buff_base = buffs[0];
 	float	*target_buffer = (float *) buff_base;
 	int16_t *itarget_buffer = (int16_t *) buff_base;
