@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iostream>
 #include <unistd.h>
+#include <cmath>
 #include "SoapyRadioberry.hpp"
 
  void SoapyRadioberry::setSampleRate( const int direction, const size_t channel, const double rate ) {
@@ -209,11 +210,6 @@ int SoapyRadioberry::readStream(
 	return (npackages * nr_samples); //return the number of IQ samples
 }
 
-union uTxBuffer
-{
-	std::uint16_t i16TxBuffer[2];
-	unsigned char i8TxBuffer[4];
-};
 
 int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *buffs, const size_t numElems, int &flags, const long long timeNs, const long timeoutUs)
 {
@@ -224,16 +220,26 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 	void const		*buff_base = buffs[0];
 	float			*target_buffer = (float *) buff_base;
 	int16_t			*itarget_buffer = (int16_t *) buff_base;
-	uTxBuffer		tx;
 	sdr_stream *ptr = (sdr_stream *)stream;
+	unsigned char i8TxBuffer[6];
 
 	if (ptr->get_stream_format() == RADIOBERRY_SDR_CF32)
 	{
 		for (int ii = 0; ii < numElems; ii++)
 		{
-			tx.i16TxBuffer[0] = (int16_t)(target_buffer[iq++] * 16384.0f);
-			tx.i16TxBuffer[1] = (int16_t)(target_buffer[iq++] * 16384.0f);
-			ret = write(fd_rb, &tx, 4 * sizeof(uint8_t));
+			const float gain = 8388608.0f;
+			int isample = target_buffer[iq] >= 0.0 ? (long)floor(target_buffer[iq] * gain + 0.5) : (long)ceil(target_buffer[iq] * gain - 0.5);
+			int qsample = target_buffer[iq + 1] >= 0.0 ? (long)floor(target_buffer[iq + 1] * gain + 0.5) : (long)ceil(target_buffer[iq + 1] * gain - 0.5);
+
+			//printf("nr_samples %d sample: %d %d \n", iq, isample,qsample );
+			
+			i8TxBuffer[0] = isample >> 16;
+			i8TxBuffer[1] = isample >> 8;
+			i8TxBuffer[2] = qsample >> 16;
+			i8TxBuffer[3] = qsample >> 8;
+			ret = write(fd_rb, i8TxBuffer, 4);
+			iq++;
+			iq++;
 		}
 	}
 	if (ptr->get_stream_format() == RADIOBERRY_SDR_CS16)
@@ -242,12 +248,11 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 	
 		for (int ii = 0; ii < numElems; ii++)
 		{
-			tx.i8TxBuffer[0] = (unsigned char)((itarget_buffer[j] & 0xff00) >> 8);
-			tx.i8TxBuffer[1] = (unsigned char)(itarget_buffer[j] & 0xff);
-			tx.i8TxBuffer[2] = (unsigned char)(((-1 * itarget_buffer[j + 1]) & 0xff00) >> 8);
-			tx.i8TxBuffer[3] = (unsigned char)((-1 * itarget_buffer[j + 1]) & 0xff);
-
-			ret = write(fd_rb, &tx, sizeof(uint32_t));
+			i8TxBuffer[0] = (unsigned char)((itarget_buffer[j] & 0xff00) >> 8);
+			i8TxBuffer[1] = (unsigned char)(itarget_buffer[j] & 0xff);
+			i8TxBuffer[2] = (unsigned char)(((itarget_buffer[j + 1]) & 0xff00) >> 8);
+			i8TxBuffer[3] = (unsigned char)((itarget_buffer[j + 1]) & 0xff);
+			ret = write(fd_rb, i8TxBuffer, 4);
 			j += 2;
 		}
 	}
