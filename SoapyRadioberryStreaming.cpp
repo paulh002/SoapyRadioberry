@@ -230,7 +230,7 @@ int SoapyRadioberry::writeStream(SoapySDR::Stream *stream, const void * const *b
 			const float gain = 8388608.0f;
 			int isample = target_buffer[iq] >= 0.0 ? (long)floor(target_buffer[iq] * gain + 0.5) : (long)ceil(target_buffer[iq] * gain - 0.5);
 			int qsample = target_buffer[iq + 1] >= 0.0 ? (long)floor(target_buffer[iq + 1] * gain + 0.5) : (long)ceil(target_buffer[iq + 1] * gain - 0.5);
-
+			qsample = qsample * -1;
 			//printf("nr_samples %d sample: %d %d \n", iq, isample,qsample );
 			
 			i8TxBuffer[0] = isample >> 16;

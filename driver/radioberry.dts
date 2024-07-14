@@ -1,0 +1,35 @@
+/*
+ * Device tree overlay for radioberry
+ *
+ * Compile:
+ * dtc -@ -I dts -O dtb -o radioberry.dtbo radioberry.dts
+ * 
+ * cp radioberry.dtbo /boot/overlays
+ *
+ * in config.txt: dtoverlay=radioberry
+ *
+ * reboot
+ *
+ * use sudo gpio readall or sudo raspi-gpio get to check the pins!!!
+ *
+ *
+ *  dtc -I fs /proc/device-tree > devtree.txt (decompile the dt and find the definition for radioberry)
+ *
+ * 	using : dtc -v Version: DTC 1.4.7
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+/{
+    compatible = "brcm,bcm2711";
+        fragment@0 {
+                target-path = "/";
+                __overlay__ {
+                                radio {
+                                        compatible = "sdr,radioberry";
+                                        rx-sample-gpio = <&gpio 25 0>;
+                                };
+                        };
+        };
+};
