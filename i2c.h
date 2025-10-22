@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <string>
+#include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
