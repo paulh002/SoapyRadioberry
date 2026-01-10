@@ -210,7 +210,7 @@ std::vector<std::string> SoapyRadioberry::listGains( const int direction, const 
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::listGains called");
 	
 	std::vector<std::string> options;
-	//options.push_back("PGA"); in pihpsdr no additional gain settings.
+	options.push_back("PGA"); //in pihpsdr no additional gain settings.
 	return(options);
 }
 
