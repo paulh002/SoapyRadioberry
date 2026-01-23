@@ -15,6 +15,7 @@ SoapyRadioberry::SoapyRadioberry( const SoapySDR::Kwargs &args ){
 	SoapySDR_log(SOAPY_SDR_INFO, "SoapyRadioberry::SoapyRadioberry  constructor called");
 	mox = false;
 	no_channels = 1;
+	poweramp_operational = false;
 	fd_rb = open("/dev/radioberry", O_RDWR);
 	try
 	{
@@ -250,6 +251,11 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 		z = z << 28;
 		command = 0x13; 
 		command_data = z;
+		if (poweramp_operational)
+		{
+			command_data |= 0x80000;
+			SoapySDR_log(SOAPY_SDR_INFO, "Enable power amplifier");
+		}
 	}
 	
 	this->SoapyRadioberry::controlRadioberry(command, command_data);
@@ -322,5 +328,56 @@ std::string SoapyRadioberry::readI2C(const int addr, const size_t numBytes)
 	}
 	return data;
 }
+
+SoapySDR::ArgInfoList SoapyRadioberry::getSettingInfo() const
+{
+	SoapySDR::ArgInfoList args;
+	SoapySDR::ArgInfo arg;
+
+	arg.key = "PowerAmp";
+	arg.name = "Power Amplifier";
+	arg.type = SoapySDR::ArgInfo::STRING;
+	arg.options = {"Operate", "Standby"};
+	arg.optionNames = {"Amplifier Status"};
+
+	args.push_back(arg);
+	return args;
+}
+
+SoapySDR::ArgInfoList SoapyRadioberry::getSettingInfo(const int direction, const size_t channel) const
+{
+	SoapySDR::ArgInfoList args;
+	SoapySDR::ArgInfo arg;
+
+	arg.key = "PowerAmp";
+	arg.name = "Power Amplifier";
+	arg.type = SoapySDR::ArgInfo::STRING;
+	arg.options = {"Operate", "Standby"};
+	arg.optionNames = {"Amplifier Status"};
+
+	args.push_back(arg);
+	return args;
+}
+
+void SoapyRadioberry::writeSetting(const std::string &key, const std::string &value)
+{
+	poweramp_operational = false;
+	if (key == "PowerAmp" && value == "Operate")
+	{
+		poweramp_operational = true;
+	}
+}
+
+std::string SoapyRadioberry::readSetting(const std::string &key) const
+{
+	if (key == "PowerAmp")
+	{
+		if (poweramp_operational)
+			return "Operate";
+		return "Standby";
+	}
+	return "";
+}
+
 // end of source.
 

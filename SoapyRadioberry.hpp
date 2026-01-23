@@ -147,8 +147,18 @@ class SoapyRadioberry : public SoapySDR::Device
 
 	std::string readI2C(const int addr, const size_t numBytes);
 	void writeI2C(const int addr, const std::string &data);
+
+	/*******************************************************************
+	 * Settings API
+	 ******************************************************************/
+
+	SoapySDR::ArgInfoList getSettingInfo() const;
+	SoapySDR::ArgInfoList getSettingInfo(const int direction, const size_t channel) const;
+	void writeSetting(const std::string &key, const std::string &value);
+	std::string readSetting(const std::string &key) const;
 	
-	private:
+
+  private:
 	
 	int			fd_rb;	
 	double		sample_rate;
@@ -160,4 +170,5 @@ class SoapyRadioberry : public SoapySDR::Device
 	std::unique_ptr<rpihw::driver::i2c> i2c_ptr;
 	bool i2c_available;
 	bool mox;
+	bool poweramp_operational;
 };
