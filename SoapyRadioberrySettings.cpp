@@ -256,6 +256,10 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 			command_data |= 0x80000;
 			SoapySDR_log(SOAPY_SDR_INFO, "Enable power amplifier");
 		}
+		else
+		{
+			command_data |= 0x40000;
+		}
 	}
 	
 	this->SoapyRadioberry::controlRadioberry(command, command_data);
