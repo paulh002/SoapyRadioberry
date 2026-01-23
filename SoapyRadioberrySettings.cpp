@@ -367,11 +367,14 @@ SoapySDR::ArgInfoList SoapyRadioberry::getSettingInfo(const int direction, const
 void SoapyRadioberry::writeSetting(const std::string &key, const std::string &value)
 {
 	poweramp_operational = false;
-	if (key == "PowerAmp" && value == "Operate")
+	if (key == "PowerAmp")
 	{
-		poweramp_operational = true;
+		if (value == "Operate")
+		{
+			poweramp_operational = true;
+		}
+		setGain(SOAPY_SDR_TX, 0, drive);
 	}
-	setGain(SOAPY_SDR_TX, 0, drive);
 }
 
 std::string SoapyRadioberry::readSetting(const std::string &key) const
