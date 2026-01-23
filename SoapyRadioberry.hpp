@@ -1,8 +1,8 @@
 #include <SoapySDR/Device.hpp>
-#include <SoapySDR/Logger.hpp>
 #include <SoapySDR/Formats.hpp>
+#include <SoapySDR/Logger.hpp>
 
-#include <stdio.h>	
+#include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -17,7 +17,8 @@
 #define TX_MAX 4800
 #define TX_MAX_BUFFER (TX_MAX * 8)
 
-typedef enum radioberrysdrStreamFormat {
+typedef enum radioberrysdrStreamFormat
+{
 	RADIOBERRY_SDR_CF32,
 	RADIOBERRY_SDR_CS16
 } radioberrysdrStreamFormat;
@@ -38,8 +39,6 @@ class sdr_stream
 	radioberrysdrStreamFormat streamFormat;
 };
 
-
-
 class SoapyRadioberry : public SoapySDR::Device
 {
 
@@ -48,8 +47,8 @@ class SoapyRadioberry : public SoapySDR::Device
 	~SoapyRadioberry();
 
 	/*******************************************************************
-		 * Identification API
-		 ******************************************************************/
+	 * Identification API
+	 ******************************************************************/
 
 	std::string getDriverKey(void) const;
 
@@ -58,16 +57,16 @@ class SoapyRadioberry : public SoapySDR::Device
 	SoapySDR::Kwargs getHardwareInfo(void) const;
 
 	/*******************************************************************
-		 * Channels API
-		 ******************************************************************/
+	 * Channels API
+	 ******************************************************************/
 
 	size_t getNumChannels(const int direction) const;
 
 	bool getFullDuplex(const int direction, const size_t channel) const;
 
 	/*******************************************************************
-		 * Stream API
-		 ******************************************************************/
+	 * Stream API
+	 ******************************************************************/
 	SoapySDR::RangeList getSampleRateRange(const int direction, const size_t channel) const;
 
 	std::vector<std::string> getStreamFormats(const int direction, const size_t channel) const;
@@ -101,8 +100,8 @@ class SoapyRadioberry : public SoapySDR::Device
 		const long timeoutUs = 100000);
 
 	/*******************************************************************
-		 * Sample Rate API
-		 ******************************************************************/
+	 * Sample Rate API
+	 ******************************************************************/
 
 	void setSampleRate(const int direction, const size_t channel, const double rate);
 
@@ -112,8 +111,8 @@ class SoapyRadioberry : public SoapySDR::Device
 	std::vector<double> listSampleRates(const int direction, const size_t channel) const;
 
 	/*******************************************************************
-		 * Frequency API
-		 ******************************************************************/
+	 * Frequency API
+	 ******************************************************************/
 
 	void setFrequency(
 		const int direction,
@@ -124,14 +123,14 @@ class SoapyRadioberry : public SoapySDR::Device
 	SoapySDR::RangeList getFrequencyRange(const int direction, const size_t channel) const;
 
 	/*******************************************************************
-		 * Antenna API
-		 ******************************************************************/
+	 * Antenna API
+	 ******************************************************************/
 
 	std::vector<std::string> listAntennas(const int direction, const size_t channel) const;
 
 	/*******************************************************************
-		 * Gain API
-		 ******************************************************************/
+	 * Gain API
+	 ******************************************************************/
 
 	std::vector<std::string> listGains(const int direction, const size_t channel) const;
 
@@ -156,19 +155,18 @@ class SoapyRadioberry : public SoapySDR::Device
 	SoapySDR::ArgInfoList getSettingInfo(const int direction, const size_t channel) const;
 	void writeSetting(const std::string &key, const std::string &value);
 	std::string readSetting(const std::string &key) const;
-	
 
   private:
-	
-	int			fd_rb;	
-	double		sample_rate;
-	int			rx_frequency;
-	int			no_channels;	
+	int fd_rb;
+	double sample_rate;
+	int rx_frequency;
+	int no_channels;
 	struct rb_info_arg_t rb_control;
-	std::mutex	send_command;
+	std::mutex send_command;
 	std::vector<sdr_stream *> streams;
 	std::unique_ptr<rpihw::driver::i2c> i2c_ptr;
 	bool i2c_available;
 	bool mox;
 	bool poweramp_operational;
+	uint32_t drive;
 };

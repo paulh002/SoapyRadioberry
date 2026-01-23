@@ -245,6 +245,7 @@ void SoapyRadioberry::setGain( const int direction, const size_t channel, const 
 		if (!mox)
 			return;
 
+		drive = value;
 		uint32_t	z = (uint32_t)value;
 		if (value > 15) z = 15;
 		if (value < 0.0) z = 0;
@@ -370,6 +371,7 @@ void SoapyRadioberry::writeSetting(const std::string &key, const std::string &va
 	{
 		poweramp_operational = true;
 	}
+	setGain(SOAPY_SDR_TX, 0, drive);
 }
 
 std::string SoapyRadioberry::readSetting(const std::string &key) const
