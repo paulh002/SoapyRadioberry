@@ -25,10 +25,10 @@
     <ClCompile Include="SoapyRadioberrySettings.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="SoapyRadioberryStreaming.cpp">
+    <ClCompile Include="i2c.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="i2c.cpp">
+    <ClCompile Include="SoapyRadioberryStreaming.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

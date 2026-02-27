@@ -4,22 +4,26 @@
 #include <linux/types.h>
 #include <linux/ioctl.h>
 
-#define RADIOBERRY_MAGIC	('x')
+#define RADIOBERRY_MAGIC ('x')
 
-#define RADIOBERRY_IOC_COMMAND			_IOW(RADIOBERRY_MAGIC, 1, __u8)
+#define RADIOBERRY_IOC_COMMAND _IOW(RADIOBERRY_MAGIC, 1, __u8)
 
 struct rb_info_arg_t
 {
-    int major, minor;
-	
-	int fpga;
-	
-	int version;
-	
+	/* gateware info */
+	int major; /* gateware major version */
+	int minor; /* gateware minor version */
+	int fpga;  /* gateware fpga type used by radioberry board */
+	int nr;	   /* gateware number of implemented receivers */
+	int nt;	   /* gateware number of implemented transmitters */
+
+	/* driver info */
+	int version; /*driver version*/
+
+	/* protocol commands */
 	int rb_command;
 	int command;
 	int command_data;
-	
-} ;
+};
 
 #endif
