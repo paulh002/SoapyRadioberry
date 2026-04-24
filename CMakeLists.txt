@@ -2,7 +2,7 @@
 # Project setup -- only needed if device support is a stand-alone build
 # We recommend that the support module be built in-tree with the driver.
 ########################################################################
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.25)
 project(SoapyRadioberrySupport CXX)
 enable_testing()
 

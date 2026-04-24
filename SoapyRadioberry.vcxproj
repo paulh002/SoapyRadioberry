@@ -53,7 +53,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
-      <CPPLanguageStandard>CPP1Z</CPPLanguageStandard>
+      <CPPLanguageStandard>GNUPP20</CPPLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
